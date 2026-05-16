@@ -1,0 +1,6 @@
+{
+  "population_size": 8,
+  "db_path": "agent_world.db",
+  "starting_energy": 100.0,
+  "starting_balance": 0.0
+}
