@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# DB & logs
+*.db
+logs/
+checkpoints/
+
+# Node / React
+node_modules/
+dist/
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.iml
