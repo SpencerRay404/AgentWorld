@@ -52,6 +52,18 @@ CREATE TABLE IF NOT EXISTS transactions (
 )
 """
 
+CREATE_KPI_SNAPSHOTS = """
+CREATE TABLE IF NOT EXISTS kpi_snapshots (
+    snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tick        INTEGER NOT NULL,
+    cycle       INTEGER NOT NULL,
+    agent_id    TEXT NOT NULL,
+    kpi_name    TEXT NOT NULL,
+    kpi_value   REAL NOT NULL,
+    timestamp   TEXT NOT NULL
+)
+"""
+
 CREATE_WORLD_SNAPSHOTS = """
 CREATE TABLE IF NOT EXISTS world_snapshots (
     snapshot_id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,6 +83,7 @@ def init_db(db_path: str) -> sqlite3.Connection:
     cur.execute(CREATE_AGENT_STATES)
     cur.execute(CREATE_LIFECYCLE_EVENTS)
     cur.execute(CREATE_TRANSACTIONS)
+    cur.execute(CREATE_KPI_SNAPSHOTS)
     cur.execute(CREATE_WORLD_SNAPSHOTS)
     conn.commit()
     return conn

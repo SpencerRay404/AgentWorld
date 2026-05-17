@@ -16,6 +16,8 @@ from agent_world.orchestrator.event_bus import EventBus
 from agent_world.orchestrator.scheduler import Scheduler
 from agent_world.spawner import spawn_population
 from agent_world.world import World, get_payout_multiplier
+from agent_world.analytics.pipeline import TrackingPipeline
+from agent_world.analytics.alerts import AlertEngine
 
 import sqlite3
 
@@ -36,12 +38,20 @@ class SimEngine:
         self.states: Dict[str, AgentState] = {}
         self._running = False
         self._paused = False
+        self.tracking: Optional[TrackingPipeline] = None
+        self.alert_engine: Optional[AlertEngine] = None
 
     def initialize(self) -> None:
         self.agents = spawn_population(self.conn, self.config.population_size, self.config)
         for agent in self.agents:
             state = load_latest_state(self.conn, agent.agent_id)
             self.states[agent.agent_id] = state
+        self.tracking = TrackingPipeline(self)
+        self.alert_engine = AlertEngine(self)
+
+    @property
+    def kpis(self):
+        return self.tracking.kpis if self.tracking else None
 
     def run_tick(self) -> None:
         self.world.advance_tick()
@@ -123,6 +133,14 @@ class SimEngine:
             "payload": self.world.get_world_state(),
         })
         self.event_bus.dispatch_all()
+
+        # Analytics
+        if self.tracking:
+            self.tracking.on_tick(tick, self.states)
+        if self.world.is_pay_period() and self.tracking:
+            self.tracking.flush(cycle)
+        if self.world.is_pay_period() and self.alert_engine:
+            self.alert_engine.check_alerts(cycle)
 
     def run(self, n_ticks: int) -> None:
         self._running = True
