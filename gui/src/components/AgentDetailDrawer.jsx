@@ -12,8 +12,13 @@ export default function AgentDetailDrawer({ agentId, onClose }) {
 
   useEffect(() => {
     if (!agentId) return;
-    fetchAgent(agentId).then(setDetail);
-    fetchTransactions(agentId).then(setTxns);
+    const load = () => {
+      fetchAgent(agentId).then(setDetail);
+      fetchTransactions(agentId).then(setTxns);
+    };
+    load();
+    const id = setInterval(load, 2000);
+    return () => clearInterval(id);
   }, [agentId]);
 
   if (!agentId) return null;

@@ -4,6 +4,14 @@
 
 ---
 
+## Project Status
+**Current phase:** Phase 1 — Lab Construction (in progress; subphases 1.1–1.5 built, 1.6 GUI scaffolded)
+**Last updated:** 2026-05-19
+**Next milestone:** EXP-001 (100-tick validation run) per EXPERIMENT_LOG.md, then complete Phase 1.6 GUI live run (EXP-002)
+_Updated: 2026-05-19 — Weekly review. Confirmed in repo: full `agent_world/` package with `models/`, `db/` (schema.py, agent_repo.py), `orchestrator/` (engine.py, scheduler.py, event_bus.py), `maintenance/` (health, recovery, logger, errors, checkpoint), `analytics/` (kpis, pipeline, exporter, alerts), `api/` (server.py, schemas.py), plus `spawner.py`, `world.py`, `ledger.py`, `config.py`. Demos `demo_1_1.py`, `demo_1_2.py`, `demo_1_3.py` present. Tests cover agents, world, orchestrator, maintenance, analytics. `gui/` Vite/React scaffold with `src/components/`, `src/hooks/`, `src/styles/`, built `dist/`. SQLite `agent_world.db` populated; substantial event logs under `logs/` (test_analytics_events.jsonl ≈260 KB, test_events.jsonl ≈110 KB) confirm runs have executed. EXP-001 / EXP-002 still listed as "Planned" in EXPERIMENT_LOG.md and RESULTS_LOG has no findings yet — Phase 1 exit gate (validation run write-up) not yet documented._
+
+---
+
 ## 1. Stack Decisions (Locked)
 
 | Layer | Choice | Rationale |

@@ -24,6 +24,7 @@ class WorldState(BaseModel):
     tick: int
     cycle: int
     world_time: float
+    ticks_per_cycle: int
     active_workers_count: int
     max_concurrent_workers: int
     scarcity_mode: str

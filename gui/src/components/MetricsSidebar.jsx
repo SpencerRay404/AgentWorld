@@ -1,8 +1,21 @@
 const SEV_COLOR = { INFO: 'var(--teal)', WARNING: 'var(--amber)', CRITICAL: 'var(--red)' };
 
-export default function MetricsSidebar({ population, alerts, events }) {
+const BAR_COLORS = { work: 'var(--teal)', rest: 'var(--violet)', play: 'var(--amber)' };
+
+function fatigueColor(fi) {
+  if (fi >= 0.75) return 'var(--red)';
+  if (fi >= 0.4) return 'var(--amber)';
+  return 'var(--teal)';
+}
+
+export default function MetricsSidebar({ population, alerts, events, kpis }) {
   const recentAlerts = (alerts || []).slice(-5).reverse();
   const recentEvents = (events || []).slice(-10).reverse();
+
+  // Sort agents by fatigue descending for the KPI table
+  const kpiRows = kpis
+    ? Object.values(kpis).sort((a, b) => b.fatigue_index - a.fatigue_index)
+    : [];
 
   return (
     <div style={{
@@ -24,6 +37,41 @@ export default function MetricsSidebar({ population, alerts, events }) {
           {population.bottom_earner && (
             <Metric label="LOW EARNER" value={`${population.bottom_earner.name} $${population.bottom_earner.earnings.toFixed(0)}`} color="var(--amber)" />
           )}
+        </div>
+      )}
+
+      {/* Per-agent KPI table */}
+      {kpiRows.length > 0 && (
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 9, color: 'var(--textDim)', letterSpacing: '0.12em', marginBottom: 8 }}>
+            AGENT KPIs
+          </div>
+          {kpiRows.map(row => (
+            <div key={row.name} style={{ marginBottom: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                <span style={{ fontSize: 10, color: 'var(--bright)' }}>{row.name}</span>
+                <span style={{ fontSize: 10, color: fatigueColor(row.fatigue_index) }}>
+                  FI {row.fatigue_index.toFixed(3)}
+                </span>
+              </div>
+              {/* Work/rest/play mini bar */}
+              <div style={{ display: 'flex', height: 4, borderRadius: 2, overflow: 'hidden', gap: 1 }}>
+                {['work', 'rest', 'play'].map(k => (
+                  <div key={k} style={{
+                    width: `${(row.work_rest_play?.[k] || 0) * 100}%`,
+                    background: BAR_COLORS[k],
+                    minWidth: row.work_rest_play?.[k] > 0 ? 1 : 0,
+                  }} />
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 8, fontSize: 9, color: 'var(--dim)', marginTop: 2 }}>
+                <span style={{ color: BAR_COLORS.work }}>W {((row.work_rest_play?.work || 0) * 100).toFixed(0)}%</span>
+                <span style={{ color: BAR_COLORS.rest }}>R {((row.work_rest_play?.rest || 0) * 100).toFixed(0)}%</span>
+                <span style={{ color: BAR_COLORS.play }}>P {((row.work_rest_play?.play || 0) * 100).toFixed(0)}%</span>
+                <span style={{ marginLeft: 'auto', color: 'var(--teal)' }}>${row.earnings.toFixed(0)}</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

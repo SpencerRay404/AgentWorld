@@ -6,6 +6,14 @@ export default function ControlPanel({ world, onRefresh }) {
     onRefresh();
   };
 
+  const exportCsv = async (type) => {
+    const url = `${BASE}/export/csv?type=${type}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${type}.csv`;
+    a.click();
+  };
+
   return (
     <div style={{
       borderTop: '1px solid var(--border)',
@@ -32,6 +40,24 @@ export default function ControlPanel({ world, onRefresh }) {
           letterSpacing: '0.08em',
           background: `${color}11`,
           transition: 'background 0.1s',
+        }}>
+          {label}
+        </button>
+      ))}
+
+      <span style={{ fontSize: 9, color: 'var(--textDim)', letterSpacing: '0.1em', marginLeft: 12, marginRight: 4 }}>EXPORT</span>
+      {[
+        { label: 'AGENTS', type: 'agent_summary' },
+        { label: 'TICKS', type: 'tick_history' },
+      ].map(({ label, type }) => (
+        <button key={type} onClick={() => exportCsv(type)} style={{
+          padding: '6px 12px',
+          border: '1px solid var(--border)',
+          borderRadius: 4,
+          fontSize: 11,
+          color: 'var(--dim)',
+          letterSpacing: '0.08em',
+          background: 'transparent',
         }}>
           {label}
         </button>

@@ -11,16 +11,18 @@ export function useSimData() {
 
   const fetchAll = useCallback(async () => {
     try {
-      const [w, a, p, al] = await Promise.all([
+      const [w, a, p, al, k] = await Promise.all([
         fetch(`${BASE}/world`).then(r => r.json()),
         fetch(`${BASE}/agents`).then(r => r.json()),
         fetch(`${BASE}/population`).then(r => r.json()),
         fetch(`${BASE}/alerts`).then(r => r.json()),
+        fetch(`${BASE}/kpis`).then(r => r.json()),
       ]);
       setWorld(w);
       setAgents(a);
       setPopulation(p);
       setAlerts(al);
+      setKpis(k);
     } catch {}
   }, []);
 

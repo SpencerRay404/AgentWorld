@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import threading
+from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -15,14 +16,6 @@ from agent_world.api.schemas import (
 from agent_world.config import load_config
 from agent_world.db.schema import init_db
 from agent_world.orchestrator.engine import SimEngine
-
-app = FastAPI(title="Agent World API")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Global engine — initialized on startup
 _engine: Optional[SimEngine] = None
@@ -37,24 +30,18 @@ def _get_engine() -> SimEngine:
     return _engine
 
 
-def _ws_broadcast(event: Dict[str, Any]) -> None:
-    """Called from the sim thread; schedules broadcast on the event loop."""
-    pass  # filled in by lifespan
-
-
-@app.on_event("startup")
-async def _startup():
+def _init_engine() -> None:
     global _engine
     config = load_config()
     conn = init_db(config.db_path)
     _engine = SimEngine(conn, config)
     _engine.initialize()
 
-    # Hook EventBus to broadcast to all WS clients
     loop = asyncio.get_event_loop()
 
     def _broadcast(event):
-        _recent_alerts.append(event) if event.get("event_type") == "ALERT" else None
+        if event.get("event_type") == "ALERT":
+            _recent_alerts.append(event)
         if len(_recent_alerts) > 50:
             _recent_alerts.pop(0)
         msg = json.dumps(event)
@@ -62,6 +49,21 @@ async def _startup():
             asyncio.run_coroutine_threadsafe(ws.send_text(msg), loop)
 
     _engine.event_bus.register(_broadcast)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    _init_engine()
+    yield
+
+
+app = FastAPI(title="Agent World API", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # ── World ──────────────────────────────────────────────────────────────────────
@@ -185,10 +187,14 @@ def control_start():
     e._paused = False
 
     def _run():
+        import time
         e._running = True
         while e._running:
+            while e._paused:
+                time.sleep(0.05)
+            if not e._running:
+                break
             e.run_tick()
-            import time
             if e.config.simulation_speed_delay > 0:
                 time.sleep(e.config.simulation_speed_delay)
             else:

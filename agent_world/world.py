@@ -39,6 +39,7 @@ class World:
             "tick": self.tick,
             "cycle": self.cycle,
             "world_time": self.world_time,
+            "ticks_per_cycle": self.ticks_per_cycle,
             "active_workers_count": len(self.active_workers),
             "max_concurrent_workers": self.max_concurrent_workers,
             "scarcity_mode": self.config.scarcity_mode,

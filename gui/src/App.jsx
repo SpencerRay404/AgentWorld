@@ -55,10 +55,10 @@ export default function App() {
 
         {/* Center — charts */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <Charts agents={agents} />
+          <Charts agents={agents} kpis={kpis} />
         </div>
 
-        <MetricsSidebar population={population} alerts={alerts} events={liveEvents} />
+        <MetricsSidebar population={population} alerts={alerts} events={liveEvents} kpis={kpis} />
       </div>
 
       {/* Control panel */}
